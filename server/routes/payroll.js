@@ -144,7 +144,6 @@ router.post("/add-opd-data", async (req, res) => {
 router.patch("/:id/update-opd-status", getMongoId, async (req, res) => {
   try {
     res.user.statusPayment = req.body.statusPayment;
-    res.user.statusApproved = req.body.statusApproved;
     const opdStatus = await res.user.save();
     res.json(opdStatus);
   } catch (error) {
