@@ -64,20 +64,6 @@ router.post("/user", async (req, res) => {
   }
 });
 
-// router.post("/", async (req, res) => {
-//   const addUser = new payroll({
-//     name: req.body.name,
-//     age: req.body.age,
-//     title: req.body.title,
-//   });
-//   try {
-//     const added = await addUser.save();
-//     res.status(200).json(added);
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-// });
-
 router.post("/:id/get-opd-data", opdDataCheck, async (req, res) => {
   try {
     res.json(res.user);
@@ -144,9 +130,24 @@ router.post("/add-opd-data", async (req, res) => {
 router.patch("/:id/update-opd-status", getMongoId, async (req, res) => {
   try {
     res.user.statusPayment = req.body.statusPayment;
-    res.user.statusApproved = req.body.statusApproved;
     const opdStatus = await res.user.save();
     res.json(opdStatus);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.patch("/update-opd-statuses", opdBulkUpdate, async(req, res) => {
+  try {
+    res.user.forEach((opd) => {
+      let data = new opdData({
+        ...opd,
+        statusPayment: req.body.statusPayment
+      })
+      const opdStatus =  data.save();
+      console.log('opdStatus', data)
+    res.json(opdStatus);
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -197,6 +198,24 @@ async function getMongoId(req, res, next) {
     return res.status(500).json({ message: error.message });
   }
   res.user = user;
+  next();
+}
+
+async function opdBulkUpdate(req, res, next) {
+  let newArray = [];
+  try {
+    req.body.empId.forEach((element) => {
+      let user;
+      user = opdData.findOne({ empId: element });
+      if (user === null) {
+        return res.status(400).json({ message: "cannot find user" });
+      }
+      newArray.push(user);
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+  res.user = newArray;
   next();
 }
 
@@ -432,16 +451,6 @@ router.patch("/:id/update-emp-data", payrollMiddleWare, async (req, res) => {
         value: req.body.designation,
       });
     }
-
-    // const newUserInfo = {
-    //   date: Date.now(),
-    //   empType: req.body.empType,
-    //   department: req.body.department,
-    //   salary: req.body.salary,
-    //   status: req.body.status,
-    //   designation: req.body.designation,
-    // };
-    // res.user.dataHistory.push(newUserInfo);
     const empData = await res.user.save();
     res.json(empData);
   } catch (error) {
