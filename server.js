@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const router = require("./server/routes/payroll")
 const bodyParser = require("body-parser");
+const dotenv = require('dotenv');
 
 mongoose.connect("mongodb://localhost/payroll");
 const db = mongoose.connection;
@@ -18,6 +19,9 @@ app.use(cors());
 
 app.use(bodyParser.json());
 app.use("/payroll", router);
+
+// Set up Global configuration access
+dotenv.config();
 
 app.listen(PORT, () =>
   console.log(`Server Running on port: http://localhost:${PORT}`)
