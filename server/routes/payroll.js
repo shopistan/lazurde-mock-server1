@@ -9,6 +9,17 @@ const opdData = require("../modules/opd-data");
 const allowanceData = require("../modules/allowance-data");
 const bcrypt = require("bcryptjs");
 
+router.get("/testing", (req, res) => {
+  try {
+    // const users = await payroll.find();
+    res.send({
+      test: "testasdasd",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const users = await payroll.find();
@@ -137,16 +148,16 @@ router.patch("/:id/update-opd-status", getMongoId, async (req, res) => {
   }
 });
 
-router.patch("/update-opd-statuses", opdBulkUpdate, async(req, res) => {
+router.patch("/update-opd-statuses", opdBulkUpdate, async (req, res) => {
   try {
     res.user.forEach((opd) => {
       let data = new opdData({
         ...opd,
-        statusPayment: req.body.statusPayment
-      })
-      const opdStatus =  data.save();
-      console.log('opdStatus', data)
-    res.json(opdStatus);
+        statusPayment: req.body.statusPayment,
+      });
+      const opdStatus = data.save();
+      console.log("opdStatus", data);
+      res.json(opdStatus);
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
